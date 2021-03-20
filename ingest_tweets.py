@@ -63,10 +63,13 @@ class IngestTweets:
         return pd.concat([i for i in df_final if i is not None], ignore_index=True)
 
     def load(self):
-        with open("collected_tweets_latest.txt", "r") as file:
-            tweets = file.readlines()
+        if os.path.exists("collected_tweets_latest.txt"):
+            with open("collected_tweets_latest.txt", "r") as file:
+                tweets = file.readlines()
 
-        return [json.loads(json.loads(tweet)) for tweet in tweets]
+            return [json.loads(json.loads(tweet)) for tweet in tweets]
+        else:
+            raise Exception("Latest file was not found at root directory")
 
     def ingest(self, data_frame: pd.DataFrame):
         engine = sqlalchemy.create_engine(
@@ -75,7 +78,8 @@ class IngestTweets:
                                  index=False, if_exists="append")
 
     def clean(self):
-        os.remove("collected_tweets_latest.txt")
+        if os.path.exists("collected_tweets_latest.txt"):
+            os.remove("collected_tweets_latest.txt")
         return True
 
     def run(self):
